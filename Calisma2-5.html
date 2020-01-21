@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</head>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var dosyalar = [{
+            isim: "gorevler1.pdf",
+            degistirilmeTarihi: "11/01/2020 15:10",
+            olusturmaTarihi: "12/01/2020 16:09"
+        }, {
+            isim: "gorevler2.pdf",
+            degistirilmeTarihi: "13/01/2020 11:51",
+            olusturmaTarihi: "14/01/2020 09:33"
+        }]
+        $('#buton').click(function() {
+            $('#dosyaListesi').html("")
+            for (i = 0; i < dosyalar.length; i++) {
+                let html = '<a href="#" class="list-group-item list-group-item-action flex-column align-items-start">' +
+                    '<div class="d-flex w-100 justify-content-between">' +
+                    '<h5 class="mb-1">' + dosyalar[i].isim + '</h5>' +
+                    '<small> DegiştirmeTarihi : ' + dosyalar[i].degistirilmeTarihi + '</small>' +
+                    '</div>' +
+
+                    '<small>OluşturmaTarihi :' + dosyalar[i].olusturmaTarihi + '</small>' +
+                    '</a>';
+                $('#dosyaListesi').append(html);
+            }
+        });
+    });
+</script>
+
+<body>
+    <button type="button" id="buton" class="btn btn-primary">tıkla</button>
+    <div class="list-group" id="dosyaListesi">
+    </div>
+</body>
+
+</html>

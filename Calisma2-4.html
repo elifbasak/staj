@@ -1,0 +1,17 @@
+<script type="text/javascript">
+    var dosya = {
+        isim: "gorevler.pdf",
+        degistirilmeTarihi: "19/01/2020 18:10",
+        olusturmaTarihi: "17/01/2020 18:10"
+    };
+    console.log(dosya.isim, ",",
+        dosya.degistirilmeTarihi, ",", dosya.olusturmaTarihi);
+    var keys = Object.keys(dosya);
+    var output = "";
+    for (i = 0; i < keys.length; i++) {
+        if (i == 0)
+            output += keys[i];
+        else output += ", " + keys[i];
+    }
+    console.log(output)
+</script>
