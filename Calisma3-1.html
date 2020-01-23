@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
 </head>
 <script type="text/javascript">
     $(document).ready(function() {
@@ -24,19 +24,15 @@
                 console.log(data)
                 console.log(JSON.parse(data));
                 dataArray = JSON.parse(data);
-                //  console.log(data.length)
                 $('#picture').html("")
-                for (i = 0; i < 10; i++) {
-
+                for (i = 0; i < dataArray.length; i++) {
                     let html =
-
-                        '<div><img src=' + dataArray[i].thumbnailUrl + ' " class="img-thumbnail" alt=' + dataArray[i].title + '  width="150" height="150"> ' +
-                        '<p>' + dataArray[i].title + '</p>  ' +
-                        '<button onclick="alert(\'' + dataArray[i].title + '\')">AAA</button>'
-                    '  </div>';
-
-
-
+                        '<div class="col-md-3">' +
+                        '  <div class="card" >' +
+                        '<div><img src=' + dataArray[i].thumbnailUrl + ' " class="card-img-top" alt=' + dataArray[i].title +
+                        '   <div class="card-body">' +
+                        '<p class="card-text">' + dataArray[i].title + '  </p>' +
+                        '   <a href=' + dataArray[i].url + '  class="btn btn-primary"> büyütmek için tıklayınız </a> </div>   </div>  </div>     </div>';
                     $('#picture').append(html);
                 }
             });
@@ -44,11 +40,8 @@
 </script>
 
 <body>
-
     <div class="row" id="picture">
-        <div class="col">
-
-        </div>
+    </div>
 </body>
 
 </html>
