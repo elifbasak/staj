@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+</head>
+<script type="text/javascript">
+    $(document).ready(function() {
+
+
+        $.ajax({
+                url: "https://jsonplaceholder.typicode.com/photos",
+                beforeSend: function(xhr) {
+                    xhr.overrideMimeType("text/plain; charset=x-user-defined");
+                }
+            })
+            .done(function(data) {
+                console.log(data)
+                console.log(JSON.parse(data));
+                dataArray = JSON.parse(data);
+                //  console.log(data.length)
+                $('#picture').html("")
+                for (i = 0; i < 10; i++) {
+
+                    let html =
+
+                        '<div><img src=' + dataArray[i].thumbnailUrl + ' " class="img-thumbnail" alt=' + dataArray[i].title + '  width="150" height="150"> ' +
+                        '<p>' + dataArray[i].title + '</p>  ' +
+                        '<button onclick="alert(\'' + dataArray[i].title + '\')">AAA</button>'
+                    '  </div>';
+
+
+
+                    $('#picture').append(html);
+                }
+            });
+    });
+</script>
+
+<body>
+
+    <div class="row" id="picture">
+        <div class="col">
+
+        </div>
+</body>
+
+</html>
