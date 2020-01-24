@@ -2,9 +2,9 @@
 
 $klasor=$_GET['parametre']; 
 
-$çıktı = shell_exec('ls -d -la /'.$klasor.'*/');
+$çıktı = shell_exec('ls -d -la '.$klasor.'*/ | awk \'{print $6 " " $7 " " $8 "-" $9}\'');
+//echo $çıktı;
 $list= explode( "\n" ,$çıktı);
-$pos = strpos($list[0], "/");
 $diziBoyut=count($list);
 
 ?>
@@ -32,9 +32,9 @@ $diziBoyut=count($list);
   <tbody>
   <?php for($i=0;$i<$diziBoyut-1;$i++){ 
 
-    $pos = strpos($list[$i], "/");
-    $olusturmaTarihi= (substr($list[$i],$pos-14,13));
-$isim=(substr($list[$i],$pos ));
+$pos = explode("-", $list[$i]);
+$olusturmaTarihi = $pos[0];
+$isim = $pos[1];
 ?>
     <tr>
       <th scope="row">#</th>
