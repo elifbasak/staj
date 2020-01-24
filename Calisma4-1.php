@@ -1,7 +1,6 @@
 <?php
-$çıktı = shell_exec('ls -d -la /*/');
+$çıktı = shell_exec('ls -d -la /*/ | awk \'{print $6 " " $7 " " $8 "-" $9}\'');
 $list= explode( "\n" ,$çıktı);
-$pos = strpos($list[0], "/");
 $diziBoyut=count($list);
 ?>
 <html lang="en">
@@ -28,9 +27,9 @@ $diziBoyut=count($list);
   <tbody>
   <?php for($i=0;$i<$diziBoyut-1;$i++){ 
 
-    $pos = strpos($list[$i], "/");
-    $olusturmaTarihi= (substr($list[$i],$pos-13,13));
-$isim=(substr($list[$i],$pos ));
+    $pos = explode("-", $list[$i]);
+    $olusturmaTarihi = $pos[0];
+    $isim = $pos[1];
 ?>
     <tr>
       <th scope="row">#</th>
