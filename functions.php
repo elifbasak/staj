@@ -23,16 +23,16 @@ foreach(explode("\n",$output)as $line){
                 "name","date"
             ],
 
-            "onclick" => "getDetail"
+            "onclick" => "getTable"
 
 
     ]);
         
 }
 function getTable(){
+    $param_value = request("paramaters");
 
-
-    $output=trim(runCommand('ls -d -la  | awk \'{print $6 " " $7 " "$8 "-" $9} \''));
+    $output=trim(runCommand('ls -d -la '.$param_value .'*/ | awk \'{print $6 " " $7 " "$8 "-" $9} \''));
 $array =[];
 foreach(explode("\n",$output)as $line){
     $fetch =explode('-',$line);
@@ -52,7 +52,7 @@ foreach(explode("\n",$output)as $line){
                 "name","date"
             ],
 
-            "onclick" => "getDetail"
+            "onclick" => "getTable"
 
 
     ]);
