@@ -16,7 +16,7 @@ function getTable(){
 
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
-    $output =runCommand('PGPASSWORD='.$password.' psql -c "SELECT usename from pg_catalog.pg_user " -h localhost -U '.$username.' -A | head -n -1');
+    $output =runCommand('PGPASSWORD='.$password.' psql -c "SELECT usename from pg_catalog.pg_user " -h localhost -U '.$username.' -A | head -n -1 | tail -n +2');
      $array =[];
 
     $fetch =explode("\n",$output);
@@ -32,27 +32,27 @@ function getTable(){
         "value"=>$array,
        
         "title"=>[
-            "kullanıcıAdı"
+            "Kullanıcı Adı"
         ],
 
         "display"=>[
             "name"
         ],
         "menu"=> [
-            "YetkileriGöster"=> [
+            "Yetkileri Göster"=> [
                 "target"=> "getYetkiJs",
-                "icon"=>"fa-trash",
+                "icon"=>"fa-book",
                 
 
             ],
             
-                "yetkilendir"=>[
+                "Yetkilendir"=>[
                     "target"=> "yekiVerJS",
-                    "icon"=>"fa-trash",
+                    "icon"=>"fa-pencil-ruler",
                 ],
-                "yetkiKaldır"=>[
+                "Yetki Kaldır"=>[
                     "target"=> "yekiAlJS",
-                    "icon"=>"fa-trash",
+                    "icon"=>"fa-pencil-ruler",
                 ]
             
 
@@ -203,8 +203,10 @@ function getTable2(){
      $array2 =[];
      $fetch2=[];
      $fetch3=[];
+     $fetch4=[];
 foreach(explode("\n",$output2)as $line){
         $fetch2 =explode('|',$line); 
+        $fetch4= explode("=CTc/",$fetch2[1]);
         $fetch3[$fetch2[0]]=[   
             "erisim"=>$fetch2[1]
         ];
@@ -386,7 +388,7 @@ function yetkiVer(){
    // dd($data);
     $output =runCommand('PGPASSWORD='.$password.' psql -c " GRANT ALL PRIVILEGES ON DATABASE '.$database.' TO '.$name.'" -h localhost -U postgres -A');
     //dd($output);
-    return respond($database);
+    return respond("başarılı",200);
 
 }
 function yetkiAl(){
@@ -399,7 +401,7 @@ function yetkiAl(){
    // dd($data);
     $output =runCommand('PGPASSWORD='.$password.' psql -c " REVOKE ALL ON DATABASE  '.$database.' FROM '.$name.'" -h localhost -U postgres -A');
     //dd($output);
-    return respond($database);
+    return respond("başarılı",200);
 
 }
 
@@ -423,6 +425,8 @@ function yetkiAl(){
             if($output=="postgresql-12")
                 return $versiyon;
             else  return respond("paket yüklü değil",201);
+
+         
             //dd(($versiyon));       
             }
             
