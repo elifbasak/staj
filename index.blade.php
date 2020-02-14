@@ -1,6 +1,5 @@
 
 
-
 <html>
 <body>
 <ul class="nav nav-tabs mb-2" role="tablist">
@@ -12,10 +11,10 @@
         <a class="nav-link" data-toggle="pill" onclick="getTable6()" href="#İlkSekme6">Dosyaları Görüntüle</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" data-toggle="pill" onclick="getRootTable()" href="#İlkSekme7">Paket Kontrol</a>
+        <a class="nav-link" data-toggle="pill" onclick="getRootTable()" href="#İlkSekme7">Paket Kontrolü</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" data-toggle="pill" onclick="getTable2()" href="#ikinciSekme">Databaseleri Listele</a>
+        <a class="nav-link" data-toggle="pill" onclick="getTable2()" href="#ikinciSekme">Veritabanlarını Listele</a>
     </li>
 
 </ul>
@@ -24,7 +23,7 @@
 <div class="tab-content">
     <div id="İlkSekme" class="tab-pane active">
         <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#Modal">
-            Kullanici Ekle
+            Kullanıcı Ekle
         </button>
         <div id="table">
         </div>
@@ -36,7 +35,7 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
-                    <p>Lütfen Eklemek İstediğiniz Kullanıcı İsmini Giriniz </p>
+                    <h5>Lütfen Eklemek İstediğiniz Kullanıcı İsmini Giriniz </h5>
                     <form>
                     <input type="text" id="kullanıcıAdı">
                     </form>
@@ -79,7 +78,7 @@
     <div id="ikinciSekme" class=" tab-pane ">
 
     <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#Modal2">
-            DataBase Ekle
+            Veritabanı Ekle
         </button>
        
         <div id="table2">
@@ -93,7 +92,7 @@
 
                     </div>
                     <div class="modal-body">
-                    <p>Lütfen Eklemek İstediğiniz DataBase İsmini Giriniz </p>
+                    <h5>Lütfen Eklemek İstediğiniz veritabanı İsmini Giriniz </h5>
                     <form>
                     <input type="text" id="dataBaseAdı">
                     </form>
@@ -102,7 +101,8 @@
                     <div class="modal-footer">
                         
                         <button type="button" class="btn btn-primary" id="myBtn2" >
-                            Database Ekle</button>
+                            
+                            Veritabanı Ekle</button>
                             
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" id="table2" >Kapat</button>
                         
@@ -127,12 +127,12 @@
     "input"=>[
         "-:-" => "name:hidden",
     ],
-    "submit_text" => "TablolarıGöster"
+    "submit_text" => ""
 ])
 
 @include('modal',[
     "id"=>"modaltest2",
-    "title" => " ",
+    "title" => "Veritabanı İsimleri ",
     
     "url" => API('yetkiVer'),
     "next" => "reload",
@@ -143,14 +143,14 @@
 ])
 @include('modal',[
     "id"=>"modaltest3",
-    "title" => " ",
+    "title" => "Veritabanı İsimleri",
     
     "url" => API('yetkiAl'),
     "next" => "reload",
     "input"=>[
         "-:-" => "name:hidden",
     ],
-    "submit_text" => "yetki Kaldır"
+    "submit_text" => ""
 ])
 
 
@@ -224,7 +224,19 @@ function getTable10(params) {
     });
 }
 */
-
+/*
+Swal.fire({
+    position: 'center',
+    type :'success',
+    title :"Eklendi",
+});
+        
+Swal.fire({
+    position: 'center',
+    type :'error',
+    title :"Hata oldu",
+});
+*/
 function getRootTable(params) {
     Swal.fire({
         position: 'center',
@@ -237,7 +249,13 @@ function getRootTable(params) {
         Swal.close();
         console.log(response);
         $('#table7').html(response);
-        
+        Swal.fire({
+    position: 'center',
+    type :'success',
+    title :"paket yüklü"+response,
+    timer: 2000,
+});
+     
 
     },function(error){
         let json =JSON.parse(error);
@@ -387,7 +405,12 @@ function yetkiJs(params){
     formData.append("user",user);
 formData.append("database",($(params).find('#name').text()));
     request("{{API('yetkiVer')}}" ,formData,function(response){
-        Swal.close();
+        Swal.fire({
+    position: 'center',
+    type :'success',
+    title :"Yetki Verildi",
+    timer :2000,
+});
     },function(error){
         let json =JSON.parse(error);
         Swal.fire({
@@ -412,7 +435,13 @@ function yetkiKaldırJs(params){
     formData.append("user",user);
 formData.append("database",($(params).find('#name').text()));
     request("{{API('yetkiAl')}}" ,formData,function(response){
-        Swal.close();
+        Swal.fire({
+    position: 'center',
+    type :'success',
+    title :"Yetki Kaldırıldı",
+    timer :2000,
+});
+$('#modaltest3').modal("hide");
     },function(error){
         let json =JSON.parse(error);
         Swal.fire({
@@ -495,9 +524,14 @@ function yedekleJs(params){
     formData.append("name",($(params).find('#name').text())); //phpdeki fonksiyona parametre attık
 
     request("{{API('yedekle')}}" ,formData,function(response){
-        Swal.close();
-        $('#modaltest').modal("show"); 
-        $('#modaltest').find(".modal-title").text(($(params).find('#name').text()));
+        Swal.fire({
+    position: 'center',
+    type :'success',
+    title :"yedeklendi",
+    timer :2000,
+});
+        //$('#modaltest').modal("show"); 
+       // $('#modaltest').find(".modal-title").text(($(params).find('#name').text()));
         $('#table2').html(response);
         $('#table2').find("table").DataTable({
             bFilter: true,
@@ -505,7 +539,7 @@ function yedekleJs(params){
                 url: "/turkce.json"
             }
         });
-
+  
     },function(error){
         let json =JSON.parse(error);
         Swal.fire({
