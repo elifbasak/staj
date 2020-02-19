@@ -4,17 +4,17 @@
 <body>
 <ul class="nav nav-tabs mb-2" role="tablist">
     <li class="nav-item">
-        <a class="nav-link active" data-toggle="pill" onclick="getTable()" href="#İlkSekme">Kullanıcıları Listele</a>
+        <a class="nav-link active" data-toggle="pill" onclick="userTable()" href="#İlkSekme">Kullanıcıları Listele</a>
     </li>
 
     <li class="nav-item">
-        <a class="nav-link" data-toggle="pill" onclick="getTable6()" href="#İlkSekme6">Dosyaları Görüntüle</a>
+        <a class="nav-link" data-toggle="pill" onclick="getTable2()" href="#ikinciSekme">Veritabanlarını Listele</a>
     </li>
     <li class="nav-item">
         <a class="nav-link" data-toggle="pill" onclick="getRootTable()" href="#İlkSekme7">Paket Kontrolü</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" data-toggle="pill" onclick="getTable2()" href="#ikinciSekme">Veritabanlarını Listele</a>
+        <a class="nav-link" data-toggle="pill" onclick="getTable6()" href="#İlkSekme6">Yedekleri Görüntüle</a>
     </li>
 
 </ul>
@@ -157,10 +157,10 @@
 <script>
 
 var user="";
+var databaseName="";
+userTable();
 
-getTable();
-
-function getTable(params) {
+function userTable(params) {
     Swal.fire({
         position: 'center',
         type: 'info',
@@ -168,7 +168,7 @@ function getTable(params) {
         showConfirmButton: false,
 
     });
-    request("{{API('getTable')}}", new FormData(), function(response) {
+    request("{{API('userTable')}}", new FormData(), function(response) {
         Swal.close();
         $('#table').html(response);
         $('#table').find("table").DataTable({
@@ -304,7 +304,8 @@ function getTable6(params) {
 function getYedekleJS(params){
     var formData = new FormData();
     formData.append("name",($(params).find('#name').text())); //phpdeki fonksiyona parametre attık
-
+    databaseName=($(params).find('#name').text());
+    console.log(databaseName);
     request("{{API('getYedekle')}}" ,formData,function(response){
         Swal.close();
         $('#modaltest').modal("hide"); 
@@ -316,7 +317,6 @@ function getYedekleJS(params){
                 url: "/turkce.json"
             }
         });
-
     },function(error){
         let json =JSON.parse(error);
         Swal.fire({
@@ -328,31 +328,39 @@ function getYedekleJS(params){
         });
 
     });
-
-
-    
 }
 
 
+function tableContentJs(params){
+    var formData = new FormData();
+    formData.append("databaseName",databaseName);
+    formData.append("name",($(params).find('#name').text())); 
+    request("{{API('tableContent')}}" ,formData,function(response){
+      //  Swal.close();
+        $('#table2').html(response);
+        $('#table2').find("table").DataTable({
+            bFilter: true,
+            "language": {
+                url: "/turkce.json"
+            }
+        });
+    },function(error){
+        let json =JSON.parse(error);
+        Swal.fire({
+        position: 'center',
+        type :'error',
+        title :json["message"],
+      timer :2000,
+      showConfirmButton:false,
+        });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    });
+}
 function yekiVerJS(params){
     var formData = new FormData();
     formData.append("name",($(params).find('#name').text()));
     user=($(params).find('#name').text());
-    request("{{API('getDataBase')}}" ,formData,function(response){
+    request("{{API('databaseGet')}}" ,formData,function(response){
         Swal.close();
         $('#modaltest2').modal("show"); 
         $('#modaltest2').find('.modal-body').html(response);
@@ -376,7 +384,7 @@ function yekiAlJS(params){
     var formData = new FormData();
     formData.append("name",($(params).find('#name').text()));
     user=($(params).find('#name').text());
-    request("{{API('getDataBase2')}}" ,formData,function(response){
+    request("{{API('databaseGet2')}}" ,formData,function(response){
         Swal.close();
         $('#modaltest3').modal("show"); 
         $('#modaltest3').find('.modal-body').html(response);
@@ -404,6 +412,7 @@ function yetkiJs(params){
 
     formData.append("user",user);
 formData.append("database",($(params).find('#name').text()));
+
     request("{{API('yetkiVer')}}" ,formData,function(response){
         Swal.fire({
     position: 'center',
@@ -426,9 +435,6 @@ formData.append("database",($(params).find('#name').text()));
 
     
 }
-
-
-
 function yetkiKaldırJs(params){
     var formData = new FormData();
 
@@ -453,20 +459,12 @@ $('#modaltest3').modal("hide");
         });
 
     });
-
-
-    
 }
-
-
-
-
-
-function getYetkiJs(params){
+function permissionGetJs(params){
     var formData = new FormData();
     formData.append("name",($(params).find('#name').text())); //phpdeki fonksiyona parametre attık
 
-    request("{{API('getYetki')}}" ,formData,function(response){
+    request("{{API('permissionGet')}}" ,formData,function(response){
         Swal.close();
        
         $('#table').html(response);
@@ -492,33 +490,6 @@ function getYetkiJs(params){
 
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function yedekleJs(params){
     var formData = new FormData();
     formData.append("name",($(params).find('#name').text())); //phpdeki fonksiyona parametre attık
