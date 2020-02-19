@@ -12,7 +12,7 @@ function userAdd(){
 
 
 
-function getTable(){
+function userTable(){
 
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
@@ -40,7 +40,7 @@ function getTable(){
         ],
         "menu"=> [
             "Yetkileri Göster"=> [
-                "target"=> "getYetkiJs",
+                "target"=> "permissionGetJs",
                 "icon"=>"fa-book",
                 
 
@@ -112,7 +112,7 @@ for($i=1;$i<$a;$i++){
 
 
 
-function getDataBase(){
+function databaseGet(){
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
 
@@ -150,7 +150,7 @@ return view('table',[
 
 }
 
-function getDataBase2(){
+function databaseGet2(){
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
 
@@ -198,18 +198,34 @@ function getTable2(){
    // $output =runCommand('PGPASSWORD='.$password.' psql -c "SELECT datname from pg_database" -h localhost -U '.$username.' -A | head -n -1');
    $output = runCommand('PGPASSWORD='.$password.' psql -d postgres -c "\\l" -h localhost -U postgres -A | awk -F"|" \'{ if (NR>2 && $2) print $1 "-" $2 }\'');
    $output2 = runCommand('PGPASSWORD='.$password.' psql -c "SELECT datname,datacl from pg_database " -h localhost -U postgres -A | awk -F"|" \'{ if (NR>1) print $1 "|" $2 }\' | head -n -1');
-  //dd($output);
+        // dd($output2);
+  $output3=runCommand('PGPASSWORD='.$password.' psql -c " SELECT pg_database.datname as "database_name", pg_size_pretty(pg_database_size(pg_database.datname)) AS size_in_mb FROM pg_database ORDER by size_in_mb DESC" -h localhost -U postgres -A | tail -n +2');
      $array =[];
-     $array2 =[];
+     $array2=[];
+     $fetch=[];
      $fetch2=[];
      $fetch3=[];
      $fetch4=[];
+     $fetch5=[];
+     $fetch7=[];
+   /*  foreach(explode("\n",$output2) as $line){
+        $fetch6 =explode('|',$line); 
+        $fetch7= explode("=CTc/",$fetch6[1]);
+     }
+*/
+     //dd( $fetch7);
 foreach(explode("\n",$output2)as $line){
         $fetch2 =explode('|',$line); 
         $fetch4= explode("=CTc/",$fetch2[1]);
         $fetch3[$fetch2[0]]=[   
             "erisim"=>$fetch2[1]
         ];
+}
+foreach(explode("\n",$output3)as $line){
+    $fetch5 =explode('|',$line); 
+    $fetch4[$fetch5[0]]=[   
+        "size"=>$fetch5[1]
+    ];
 }
 
 
@@ -220,20 +236,26 @@ foreach(explode("\n",$output2)as $line){
         $array[]=array_merge([
             "name"=> $fetch[0],
             "owner"=> $fetch[1]
-        ], $fetch3[$fetch[0]]);
-    
+        ], $fetch3[$fetch[0]],$fetch4[$fetch[0]]);
+       
     
 }
-  
+/*
+foreach($array as $line){
+    $array[]=array_merge([
+        
+    ], $fetch4[$fetch[0]]);
+}
+  */
     return view('table',[
         "value"=>$array,
        
         "title"=>[
-            "DataBaseAdı","Owner","Erisim"
+            "Veritabanı İsmi","Oluşturan","Erisim","Size"
         ],
 
         "display"=>[
-            "name","owner","erisim"
+            "name","owner","erisim","size"
         ],
         "menu"=> [
             "TablolarıGöster"=> [
@@ -297,11 +319,6 @@ function yedekle(){
     $password = extensionDb("postgrePassword");
     $name = request("name");
     $output = runCommand('PGPASSWORD='.$password.' pg_dump -U '.$username.' -h localhost '.$name.'  >  /opt/ilkyedek/'.$name.'-0921200922.sql');
-  
-
-
-
-
     return respond($name);
 }
 
@@ -310,34 +327,121 @@ function getYedekle(){
     $password = extensionDb("postgrePassword");
     $name = request("name");
     $output =  runCommand('PGPASSWORD=Passw0rd psql -d '.$name.' -c "SELECT * from pg_tables WHERE schemaname=\'public\'" -h localhost -U postgres -A | awk -F"|" \'{ if (NR>1) print $2 }\'');
+    $output2=runCommand('PGPASSWORD=Passw0rd psql -d '.$name.' -c "\d+" -h localhost -U postgres -A | awk -F"|" \'{print $2 "|" $5 }\' | head -n -1 | tail -n +3');
+    $fetch5=[];
+    $fetch4=[];
+  //dd($output2);
     $array =[];
+
+    foreach(explode("\n",$output2)as $line){
+        $fetch5 =explode('|',$line); 
+        $fetch4[$fetch5[0]]=[   
+            "size"=>$fetch5[1]
+        ];
+    }
+  
     $fetch =explode("\n",$output);
     foreach($fetch as $line){
 
-        $array[]=[
+        $array[]=array_merge([
             
             "name"=> $line
-        ];
+        ],$fetch4[$line]);
+
+        
     }
+    
 
 
     return view('table',[
         "value"=>$array,
        
         "title"=>[
-            "tabloADı"
+            "Tablo İsmi","Boyut"
         ],
 
         "display"=>[
-            "name"
+            "name","size"
+        ],
+
+         "menu"=> [
+            "Tablo içeriğini Göster"=> [
+                "target"=> "tableContentJs",
+                "icon"=>"fa-trash",
+                
+
+            ],
+          
         ]
-        
 
 
 
 ]);
   }
-  function getYetki(){
+
+
+ 
+  function tableContent(){
+    $username = extensionDb("postgreUsername");
+    $password = extensionDb("postgrePassword");
+    $name = request("name");
+    $database = request("databaseName");
+   
+    $output =  runCommand('PGPASSWORD='.$password.' psql -d '.$database.' -c "SELECT * FROM '.$name.'" -h localhost -U postgres -A | awk -F"|" \'{ print $0}\' | head -n -1');
+
+    $headers = explode("|",explode("\n",$output)[0]);
+    $array=[];
+    foreach(explode("\n",$output)as $line){
+        $fetch = explode('|',$line);
+        $dizi = [];
+        for($i = 0; $i < count($fetch);$i++){
+            $dizi[$headers[$i]] = $fetch[$i];
+        }
+        array_push($array,$dizi);
+     }
+   
+     unset($array[0]);
+     return view('table',[
+        "value"=>$array,
+       
+        "title"=>$headers,
+
+        "display"=>$headers
+     ]);
+}
+    
+    /* $data = [
+        [
+            "ad" => "mert",
+            "soyad" => "celen"
+        ],
+        [
+            "ad" => "basak",
+            "soyad" => "yildirim"
+        ]
+     ];
+
+     $basliklar = [
+         "İsmi", "Cismi"
+     ];
+
+     $goruntulenecek = [
+         "ad" , "soyad"
+     ];
+
+
+     return view('table',[
+        "value"=>$data,
+       
+        "title"=>$basliklar,
+
+        "display"=>$goruntulenecek
+    
+]);
+  */
+
+  
+  function permissionGet(){
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
     $name = request("name");
@@ -363,21 +467,15 @@ function getYedekle(){
         "value"=>$array,
        
         "title"=>[
-            "yetkilidatabaseler"
+            "Yetkili Veritabanları"
         ],
 
         "display"=>[
             "name"
         ]
-        
-
-
-
+    
 ]);
   }
-
-
-
 function yetkiVer(){
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
@@ -404,8 +502,6 @@ function yetkiAl(){
     return respond("başarılı",200);
 
 }
-
-
  function getRootTable(){
 
                 $output2=trim(runCommand('apt show postgresql-12'));
@@ -430,7 +526,13 @@ function yetkiAl(){
             //dd(($versiyon));       
             }
             
+ function sizeDatabase(){
+$username = extensionDb("postgreUsername");
+$password = extensionDb("postgrePassword");
 
+$output =runCommand('PGPASSWORD='.$password.' psql -c " SELECT pg_database.datname as "database_name", pg_size_pretty(pg_database_size(pg_database.datname)) AS size_in_mb FROM pg_database ORDER by size_in_mb DESC" -h localhost -U postgres -A');
+
+            }
 
 
 
