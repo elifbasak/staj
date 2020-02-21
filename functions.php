@@ -326,8 +326,8 @@ function getYedekle(){
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
     $name = request("name");
-    $output =  runCommand('PGPASSWORD=Passw0rd psql -d '.$name.' -c "SELECT * from pg_tables WHERE schemaname=\'public\'" -h localhost -U postgres -A | awk -F"|" \'{ if (NR>1) print $2 }\'');
-    $output2=runCommand('PGPASSWORD=Passw0rd psql -d '.$name.' -c "\d+" -h localhost -U postgres -A | awk -F"|" \'{print $2 "|" $5 }\' | head -n -1 | tail -n +3');
+    $output =  runCommand('PGPASSWORD='.$password.' psql -d '.$name.' -c "SELECT * from pg_tables WHERE schemaname=\'public\'" -h localhost -U postgres -A | awk -F"|" \'{ if (NR>1) print $2 }\'');
+    $output2=runCommand('PGPASSWORD='.$password.' psql -d '.$name.' -c "\d+" -h localhost -U postgres -A | awk -F"|" \'{print $2 "|" $5 }\' | head -n -1 | tail -n +3');
     $fetch5=[];
     $fetch4=[];
   //dd($output2);
@@ -352,7 +352,7 @@ function getYedekle(){
     }
     
 
-
+//dd($array);
     return view('table',[
         "value"=>$array,
        
@@ -386,7 +386,7 @@ function getYedekle(){
     $password = extensionDb("postgrePassword");
     $name = request("name");
     $database = request("databaseName");
-   
+   //dd($name);
     $output =  runCommand('PGPASSWORD='.$password.' psql -d '.$database.' -c "SELECT * FROM '.$name.'" -h localhost -U postgres -A | awk -F"|" \'{ print $0}\' | head -n -1');
 
     $headers = explode("|",explode("\n",$output)[0]);
@@ -401,6 +401,7 @@ function getYedekle(){
      }
    
      unset($array[0]);
+
      return view('table',[
         "value"=>$array,
        
@@ -408,7 +409,89 @@ function getYedekle(){
 
         "display"=>$headers
      ]);
+    }
+
+    function addTableForm()
+    {
+        $username = extensionDb("postgreUsername");
+        $password = extensionDb("postgrePassword");
+        $name = request("name");
+        $database = request("databaseName");
+        $output =  runCommand('PGPASSWORD='.$password.' psql -d '.$database.' -c "SELECT * FROM '.$name.'" -h localhost -U postgres -A | awk -F"|" \'{ print $0}\' | head -n -1');
+    
+        $headers = explode("|",explode("\n",$output)[0]);
+        $array=[];
+        foreach(explode("\n",$output)as $line){
+            $fetch = explode('|',$line);
+            $dizi = [];
+            for($i = 0; $i < count($fetch);$i++){
+                $dizi[$headers[$i]] = $fetch[$i];
+            }
+            array_push($array,$dizi);
+         }
+       
+         unset($array[0]);
+    
+         $inputs = [];
+    
+         foreach($headers as $header){
+             $inputs[$header] = $header.":text";
+         }
+         return "<form id='tableForm'>".view('inputs', [
+             "inputs" => $inputs
+         ])."</form>";
+
+                  
+        //  $html = "";
+
+        //  foreach($headers as $header){
+        //     $html .= "<label>$header</label><input type='text' name='$header'/><br>";
+        //      //$inputs[$header] = $header.":text";
+        //  }
+        //  return "<form id='tableForm'>".$html."</form>";
+    }
+function addTableInto(){
+    $param_value = request("par");
+    $password = extensionDb("postgrePassword");
+    //$output = runCommand('echo "'PGPASSWORD='.$password.' psql -c "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (8,\'Paul\',32,\'California\', 20000.00,\'2001-07-13\');" -h localhost -U postgres' > /tmp/basak01 ');
+    //return respond("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (75,'Paul',32,'California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
+    $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (7,'Paul',32,'California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
+
+//    $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (75,'Paul',32,'California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
+
+    //$output = runCommand(sudo().'-u postgres createdb '.$param_value.' 2>&1');
+    return respond($output);
 }
+
+function addTableInto2(){
+    $param_value = json_decode(request("data"));
+    $password = extensionDb("postgrePassword");
+    $firstParam;
+    $secondParam;
+    $name = request("name");
+        $database = request("databaseName");
+    foreach($param_value as $line){
+        $firstParam .= ",".$line->name;
+    }
+    $firstParam= substr( $firstParam,1);
+    $firstParam= strtoupper($firstParam);
+    $name= strtoupper($name);
+    foreach($param_value as $line){
+        if(is_numeric($line->value))
+        $secondParam .= ",".$line->value;
+        else if(strpos($line->value, '-') !== false) 
+        $secondParam .= ","."'".$line->value."'";
+        else
+        $secondParam .= ","."'".$line->value."'";
+    }
+    $secondParam= substr( $secondParam,1);
+   // dd("PGPASSWORD=".$password." psql -c \"INSERT INTO '.$name.' ('.$firstParam.') VALUES ('.$secondParam.');\" -h localhost -U postgres");
+    $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO ".$name. "(".$firstParam.") VALUES (".$secondParam.");\" -h localhost -U postgres");
+    //return respond('PGPASSWORD='.$password.' psql -c "INSERT INTO '.$name.' ('.$firstParam.') VALUES ('.$secondParam.');" -h localhost -U postgres');
+    return respond($output);
+}
+
+
     
     /* $data = [
         [
@@ -504,7 +587,7 @@ function yetkiAl(){
 }
  function getRootTable(){
 
-                $output2=trim(runCommand('apt show postgresql-12'));
+                $output2=trim(runCommand('apt show postgresql'));
                // dd($output2);
               
                 $array2= explode("\n",$output2);
@@ -516,9 +599,9 @@ function yetkiAl(){
                     return respond("paket yüklü değil",201);
                 }
                 $versiyon=substr($array2[1],$pos+1 );
-               $output= trim(runCommand('dpkg --get-selections | grep -v deinstall | awk \'{print $1} \' |  grep \'^postgresql-12$\''));
+               $output= trim(runCommand('dpkg --get-selections | grep -v deinstall | awk \'{print $1} \' |  grep \'^postgresql\' | head -1'));
                
-            if($output=="postgresql-12")
+            if(strpos($output,'postgresql') !== false)
                 return $versiyon;
             else  return respond("paket yüklü değil",201);
 
