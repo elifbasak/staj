@@ -191,7 +191,7 @@ return view('table',[
 
     
 
-function getTable2(){
+function databaseTable(){
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
 
@@ -259,7 +259,7 @@ foreach($array as $line){
         ],
         "menu"=> [
             "TablolarıGöster"=> [
-                "target"=> "getYedekleJS",
+                "target"=> "showTableJS",
                 "icon"=>"fa-trash",
                 
 
@@ -322,12 +322,16 @@ function yedekle(){
     return respond($name);
 }
 
-function getYedekle(){
+function showTable(){
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
     $name = request("name");
     $output =  runCommand('PGPASSWORD='.$password.' psql -d '.$name.' -c "SELECT * from pg_tables WHERE schemaname=\'public\'" -h localhost -U postgres -A | awk -F"|" \'{ if (NR>1) print $2 }\'');
     $output2=runCommand('PGPASSWORD='.$password.' psql -d '.$name.' -c "\d+" -h localhost -U postgres -A | awk -F"|" \'{print $2 "|" $5 }\' | head -n -1 | tail -n +3');
+    if(($output2=="Did not find any relations.")||($output2=="Hiç bir nesne bulunamadı."))
+{
+   return  respond($output2,201);
+}
     $fetch5=[];
     $fetch4=[];
   //dd($output2);
@@ -367,6 +371,12 @@ function getYedekle(){
          "menu"=> [
             "Tablo içeriğini Göster"=> [
                 "target"=> "tableContentJs",
+                "icon"=>"fa-trash",
+                
+
+            ],
+            "Explain"=> [
+                "target"=> "explainJs",
                 "icon"=>"fa-trash",
                 
 
@@ -450,12 +460,13 @@ function getYedekle(){
         //  }
         //  return "<form id='tableForm'>".$html."</form>";
     }
+
 function addTableInto(){
     $param_value = request("par");
     $password = extensionDb("postgrePassword");
     //$output = runCommand('echo "'PGPASSWORD='.$password.' psql -c "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (8,\'Paul\',32,\'California\', 20000.00,\'2001-07-13\');" -h localhost -U postgres' > /tmp/basak01 ');
     //return respond("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (75,'Paul',32,'California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
-    $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (7,'Paul',32,'California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
+    $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (7,'Paul',32,California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
 
 //    $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (75,'Paul',32,'California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
 
@@ -585,7 +596,7 @@ function yetkiAl(){
     return respond("başarılı",200);
 
 }
- function getRootTable(){
+ function packageControl(){
 
                 $output2=trim(runCommand('apt show postgresql'));
                // dd($output2);
@@ -617,7 +628,41 @@ $output =runCommand('PGPASSWORD='.$password.' psql -c " SELECT pg_database.datna
 
             }
 
+function explain(){
+    $username = extensionDb("postgreUsername");
+    $password = extensionDb("postgrePassword");
+    $name = request("tableName");
+    $database = request("databaseName");
+    $output =  runCommand('PGPASSWORD='.$password.' psql -d '.$database.' -c "EXPLAIN SELECT * FROM '.$name.'" -h localhost -U postgres -A |head -n -1 | tail -n +2');
+    $array =[];
+    $fetch =explode("\n",$output);
+    foreach($fetch as $line){
 
+        if(empty($line)){
+            continue;
+        }
+
+        $array[]=[
+            
+            "name"=> $line
+        ];
+    }
+
+
+    return view('table',[
+        "value"=>$array,
+       
+        "title"=>[
+            "QUERY PLAN"
+        ],
+
+        "display"=>[
+            "name"
+        ]
+    
+]);
+   
+}
 
             
 
