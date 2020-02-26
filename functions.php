@@ -269,6 +269,10 @@ foreach($array as $line){
                 "icon"=>"fa-trash",
                 
 
+            ],
+            "tablo Ekle"=>[
+                "target"=>"tableAddJs",
+                "icon"=>"fa-trash",
             ]
             
         ]
@@ -381,6 +385,11 @@ function showTable(){
                 
 
             ],
+            
+                "Veri Sİl"=>[
+                    "target"=>"deleteFromTableJs",
+                    "icon"=>"fa-trash",
+                ],
           
         ]
 
@@ -496,9 +505,11 @@ function addTableInto2(){
         $secondParam .= ","."'".$line->value."'";
     }
     $secondParam= substr( $secondParam,1);
+   // dd("PGPASSWORD=".$password." psql -c \"INSERT INTO ".$name. "(".$firstParam.") VALUES (".$secondParam.");\" -h localhost -U postgres");
    // dd("PGPASSWORD=".$password." psql -c \"INSERT INTO '.$name.' ('.$firstParam.') VALUES ('.$secondParam.');\" -h localhost -U postgres");
     $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO ".$name. "(".$firstParam.") VALUES (".$secondParam.");\" -h localhost -U postgres");
     //return respond('PGPASSWORD='.$password.' psql -c "INSERT INTO '.$name.' ('.$firstParam.') VALUES ('.$secondParam.');" -h localhost -U postgres');
+
     return respond($output);
 }
 
@@ -626,7 +637,21 @@ $password = extensionDb("postgrePassword");
 
 $output =runCommand('PGPASSWORD='.$password.' psql -c " SELECT pg_database.datname as "database_name", pg_size_pretty(pg_database_size(pg_database.datname)) AS size_in_mb FROM pg_database ORDER by size_in_mb DESC" -h localhost -U postgres -A');
 
-            }
+  }
+
+
+
+ function tableAdd(){
+$username = extensionDb("postgreUsername");
+$password = extensionDb("postgrePassword");
+$tableCreate = request("par");
+$databaseName = request("databaseName");
+dd('PGPASSWORD='.$password.' psql -d '.$databaseName.' -c "'.$tableCreate.' " -h localhost -U postgres -A');
+$output =runCommand('PGPASSWORD='.$password.' psql -d '.$databaseName.' -c "'.$tableCreate.' " -h localhost -U postgres -A');
+
+return respond($output);
+}
+
 
 function explain(){
     $username = extensionDb("postgreUsername");
@@ -671,6 +696,17 @@ function dataBaseAdd(){
     $output = runCommand(sudo().'-u postgres createdb '.$param_value.' 2>&1');
   
     return respond($output);
+}
+
+function deleteFromTable(){
+    $username = extensionDb("postgreUsername");
+    $password = extensionDb("postgrePassword");
+    $tableName = request("name");
+    $databaseName = request("databaseName");
+    $id= request("par");
+    $tableName= strtoupper($tableName);
+    $output =runCommand('PGPASSWORD='.$password.' psql  -d '.$databaseName.' -c "DELETE FROM '.$tableName.' WHERE ID ='.$id.'" -h localhost -U postgres -A');
+return respond($output);
 }
 
 ?>
