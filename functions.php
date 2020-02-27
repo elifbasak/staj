@@ -426,7 +426,15 @@ function showTable(){
        
         "title"=>$headers,
 
-        "display"=>$headers
+        "display"=>$headers,
+        "menu"=> [
+            "sil"=> [
+                "target"=> "deleteFromContentJS",
+                "icon"=>"fa-trash",
+                
+
+            ],
+            ]
      ]);
     }
 
@@ -473,9 +481,10 @@ function showTable(){
 function addTableInto(){
     $param_value = request("par");
     $password = extensionDb("postgrePassword");
+
     //$output = runCommand('echo "'PGPASSWORD='.$password.' psql -c "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (8,\'Paul\',32,\'California\', 20000.00,\'2001-07-13\');" -h localhost -U postgres' > /tmp/basak01 ');
     //return respond("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (75,'Paul',32,'California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
-    $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (7,'Paul',32,California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
+    $output = runCommand("PGPASSWORD=".$password." psql -c \"$param_value\" -h localhost -U postgres");
 
 //    $output = runCommand("PGPASSWORD=".$password." psql -c \"INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY,JOIN_DATE) VALUES (75,'Paul',32,'California', 20000.00,'2001-07-13');\" -h localhost -U postgres");
 
@@ -707,6 +716,18 @@ function deleteFromTable(){
     $tableName= strtoupper($tableName);
     $output =runCommand('PGPASSWORD='.$password.' psql  -d '.$databaseName.' -c "DELETE FROM '.$tableName.' WHERE ID ='.$id.'" -h localhost -U postgres -A');
 return respond($output);
+}
+
+
+
+function deleteFromContent(){
+    $username = extensionDb("postgreUsername");
+    $password = extensionDb("postgrePassword");
+    $databaseName = request("databaseName");
+    $tableName = request("name");
+    $id= request("id");
+    $output =runCommand('PGPASSWORD='.$password.' psql  -d '.$databaseName.' -c "DELETE FROM '.$tableName.' WHERE ID ='.$id.'" -h localhost -U postgres -A');
+    return respond($output);
 }
 
 ?>
