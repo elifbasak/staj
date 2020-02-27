@@ -66,10 +66,7 @@
             Veritabanı Ekle
         </button>
 
-        <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#Modal3">
-            Tabloya Veri  Komut İle Ekle
-        </button>
-
+     
         <div  data-toggle="modal" data-target="#Modal9">
             
         </div>
@@ -191,6 +188,26 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="modaltest4">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        
+                     </div>
+                    
+                    <div class="modal-footer">
+                       
+                        <button type="button" class="btn btn-primary" id="myBtn4"> Manuel Ekle</button>
+                        <button type="button" class="btn btn-primary" id="myBtn5"> Komut ile Ekle</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
     </div>
 
@@ -248,9 +265,10 @@
         ],
         "submit_text" => ""
     ])
+   
     @component('modal-component',[
-        "id"=>"modaltest4",
-        "title" => "Veritabanı İsimleri ",
+        "id"=>"modaltest45",
+        "title" => "Veritabanı İsimleri 2",
         "footer" => [
     
             "text" => "Ekle",
@@ -263,7 +281,7 @@
        
     ])
     @endcomponent
-  
+
     @component('modal-component',[
         "id"=>"modaltest5",
         "title" => "Tablo Girdileri",
@@ -766,6 +784,18 @@
         });
     
     });
+      
+    $("#myBtn4").click(function() {
+        addTableForm();
+    
+});
+$("#myBtn5").click(function() {
+    $('#modaltest4').modal("hide");
+    $('#Modal3').modal("show");
+
+    
+});
+
     $("#myBtn9").click(function() {
     
    
@@ -868,6 +898,7 @@ formData.append("par",idSelect);
     
     request("{{API('addTableInto')}}", formData, function(response) {
         $('#Modal3').modal("hide");
+       
     }, function(error) {
         let json = JSON.parse(error);
         Swal.fire({
@@ -969,7 +1000,28 @@ formData.append("par",idSelect);
     
     });
     }
-    
+    function deleteFromContentJS(params){
+        var formData = new FormData();
+       
+        formData.append("id",($(params).find('#id').text()));
+        formData.append("databaseName",databaseName);
+        formData.append("name",tableName); 
+        request("{{API('deleteFromContent')}}", formData, function(response) {
+       
+       
+   }, function(error) {
+       let json = JSON.parse(error);
+       Swal.fire({
+           position: 'center',
+           type: 'error',
+           title: json["message"],
+           timer: 2000,
+           showConfirmButton: false,
+       });
+   
+   });
+
+    }
     
     </script>
     </body>
