@@ -1,6 +1,5 @@
 
 
-
 <html>
     <body>
     <ul class="nav nav-tabs mb-2" role="tablist">
@@ -16,6 +15,9 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" data-toggle="pill" onclick="getFolderJS()" href="#İlkSekme6">Yedekleri Görüntüle</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="pill" onclick="getFolderJS()" href="#sekmeReplikasyon">Replikasyon Durumu</a>
         </li>
         
     </ul>
@@ -212,7 +214,10 @@
     </div>
 
 
-   
+    <div id="sekmeReplikasyon" class="tab-pane active">
+        <div id="tableReplica">
+    </div>
+</div>
         
             <div id="İlkSekme7" class="tab-pane">
                
