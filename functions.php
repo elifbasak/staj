@@ -618,6 +618,16 @@ function yetkiAl(){
 }
  function packageControl(){
 
+/*
+    $checkOperate=runCommand('hostnamectl | tail -n +7');
+    $checkOperatingSistemArray=  explode("\n",$checkOperate);
+    $checkOperatingSistem=$checkOperatingSistemArray[0];
+    $pos = strrpos($checkOperatingSistem, "Ubuntu");
+
+    if( strrpos($checkOperatingSistem, "Ubuntu") !== false){
+
+    
+
                 $output2=trim(runCommand('apt show postgresql'));
                // dd($output2);
               
@@ -636,8 +646,52 @@ function yetkiAl(){
                 return $versiyon;
             else  return respond("paket yüklü değil",201);
 
-         
-            //dd(($versiyon));       
+            }
+            else if( strrpos($checkOperatingSistem, "CentOS") !== false)
+            $outputCentos=trim(runCommand('sudo yum list  installed|grep postgresql'));
+            $array3= explode("\n",$outputCentos);
+
+            if(strpos($array3[0],'postgresql') !== false)
+            return $versiyon;
+        else  return respond("paket yüklü değil",201);
+            //dd(($versiyon));    
+            */
+            $checkCentos=runCommand('which yum > /dev/null && echo 1 || echo 0');
+            if ($checkCentos=="1"){ 
+                $outputCentos=trim(runCommand('yum list installed | grep postgresql'));
+                $array3= explode("\n",$outputCentos);
+                $versiyonCentos= preg_split('/\s+/', $array3[0]);
+              
+                if(strpos($array3[0],'postgresql') !== false)
+                return   $versiyonCentos[1];
+            else  return respond("paket yüklü değil Centos",201);
+
+            }
+            $checkApt=runCommand('which apt > /dev/null && echo 1 || echo 0');
+           if($checkApt=="1"){
+
+           
+                
+                $output2=trim(runCommand('apt show postgresql'));
+               // dd($output2);
+              
+                $array2= explode("\n",$output2);
+               // dd($array2[0]);
+               // dd($array2[1]);
+                $pos = strrpos($array2[1], ":");
+                $pos2=strrpos($array2[1], "Version:");
+                if(trim($pos2)!="0"){
+                    return respond("paket yüklü değil",201);
+                }
+                $versiyon=substr($array2[1],$pos+1 );
+               $output= trim(runCommand('dpkg --get-selections | grep -v deinstall | awk \'{print $1} \' |  grep \'^postgresql\' | head -1'));
+               
+            if(strpos($output,'postgresql') !== false)
+                return $versiyon;
+            else  return respond("paket yüklü değil",201);
+
+            }
+
             }
             
  function sizeDatabase(){
