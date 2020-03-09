@@ -1,5 +1,6 @@
 
 
+
 <html>
     <body>
     <ul class="nav nav-tabs mb-2" role="tablist">
@@ -17,7 +18,7 @@
             <a class="nav-link" data-toggle="pill" onclick="getFolderJS()" href="#İlkSekme6">Yedekleri Görüntüle</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-toggle="pill" onclick="getFolderJS()" href="#sekmeReplikasyon">Replikasyon Durumu</a>
+            <a class="nav-link" data-toggle="pill" onclick="isReplicaJS()" href="#sekmeReplikasyon">Replikasyon Durumu</a>
         </li>
         
     </ul>
@@ -236,6 +237,16 @@
         ],
         "submit_text" => ""
     ])
+    @include('modal',[
+        "id"=>"modalReplica",
+        "title" => " ",
+        "url" => API('isReplicaJS'),
+        "next" => "reload",
+        "input"=>[
+            "-:-" => "name:hidden",
+        ],
+        "submit_text" => ""
+    ])
     
     @include('modal',[
         "id"=>"modaltest2",
@@ -271,6 +282,18 @@
         "submit_text" => ""
     ])
    
+
+   @include('modal',[
+        "id"=>"modaltest10",
+        "title" => "REPLİCA ",
+        
+        "url" => API('isReplica'),
+        "next" => "reload",
+        "input"=>[
+            "-:-" => "name:hidden",
+        ],
+        "submit_text" => ""
+    ])
     @component('modal-component',[
         "id"=>"modaltest45",
         "title" => "Veritabanı İsimleri 2",
@@ -423,7 +446,7 @@
         title :"Hata oldu",
     });
     */
-    function packageControlJS(params) {
+    function packageControlJS() {
         
         Swal.fire({
             position: 'center',
@@ -1027,6 +1050,44 @@ formData.append("par",idSelect);
    });
 
     }
+
+
+    function isReplicaJS(){
+        var formData = new FormData();
+       request("{{API('isReplica')}}", formData , function(response) {
+       // $('#modaltest10').modal("show"); 
+          //  $('#modaltest10').find('.modal-body').html(response);
+            if(response.indexOf('Bulunmuyor')==-1){
+            Swal.fire({
+        position: 'center',
+        type :'success',
+        title :"Replikasyon bulunuyor",
+        timer: 2000,
+    });
+   
+   // $('#modalReplica').modal("show"); 
+    //$('#modalReplica').find('.modal-body').html(response);
+
+    $('#tableReplica').html(response);
+    $('#tableReplica').find("table").DataTable({
+        bFilter: true,
+                "language": {
+                    url: "/turkce.json"
+                }
+            });
+            
+  }}, function(error) {
+      let json = JSON.parse(error);
+      Swal.fire({
+          position: 'center',
+          type: 'error',
+          title: json["message"],
+          timer: 2000,
+          showConfirmButton: false,
+      });
+  
+  });
+    }
     
     </script>
     </body>
@@ -1034,3 +1095,5 @@ formData.append("par",idSelect);
     </html>
 
 
+
+   
