@@ -15,7 +15,7 @@ function userAdd(){
 function userTable(){
 
     $username = extensionDb("postgreUsername");
-    $password = extensionDb("postgrePassword");
+    $password = extensionDb("postgrePassword");+
     $output =runCommand('PGPASSWORD='.$password.' psql -c "SELECT usename from pg_catalog.pg_user " -h localhost -U '.$username.' -A | head -n -1 | tail -n +2');
      $array =[];
 
@@ -722,6 +722,7 @@ function explain(){
     $name = request("tableName");
     $database = request("databaseName");
     $output =  runCommand('PGPASSWORD='.$password.' psql -d '.$database.' -c "EXPLAIN SELECT * FROM '.$name.'" -h localhost -U postgres -A |head -n -1 | tail -n +2');
+  
     $array =[];
     $fetch =explode("\n",$output);
     foreach($fetch as $line){
@@ -756,8 +757,11 @@ function explain(){
 
 function dataBaseAdd(){
     $param_value = request("par");
+    $username = extensionDb("postgreUsername");
+    $password = extensionDb("postgrePassword");
     $output = runCommand(sudo().'-u postgres createdb '.$param_value.' 2>&1');
-  
+ // $output=runCommand('PGPASSWORD='.$password.' psql   -c "CREATE DATABASE '.$param_value.'" -h localhost -U postgres -A');
+  dd($output);
     return respond($output);
 }
 
@@ -784,4 +788,53 @@ function deleteFromContent(){
     return respond($output);
 }
 
+
+
+function isReplica(){
+    $username = extensionDb("postgreUsername");
+    $password = extensionDb("postgrePassword");
+    $output =runCommand('PGPASSWORD='.$password.' psql   -c "select usename, application_name, client_addr, state, sync_priority, sync_state from pg_stat_replication;" -h localhost -U postgres -A | tail -1');
+   
+   
+    if(strpos($output, '0') !== false )
+    {
+        return respond("Replikasyon Bulunmuyor",201);
+    }
+    
+
+
+    $output2 =runCommand('PGPASSWORD='.$password.' psql   -c "select usename, application_name, client_addr, state, sync_priority, sync_state from pg_stat_replication;" -h localhost -U postgres -A  | tail  -n +2 | head -n -1 ' );
+  //dd($output2);
+   // $output2 =runCommand('PGPASSWORD='.$password.' psql   -c "select usename, application_name, client_addr, state, sync_priority, sync_state from pg_stat_replication;" -h localhost -U postgres -A | head -n +1' );
+   foreach(explode("\n",$output2)as $line){
+    $fetch =explode('|',$line);
+    $array[]=[
+        "usename"=> $fetch[0],
+        "application_name"=> $fetch[1],
+        "client_addr"=> $fetch[2],
+        "state"=> $fetch[3],
+        "sync_priority"=> $fetch[4],
+        "sync_state"=> $fetch[5],
+    
+    ];
+}
+// dd($array);
+     return view('table',[
+         "value"=>$array,
+        
+         "title"=>[
+            "usename" ,"application_name","client_addr","state", "sync_priority " ,"sync_state", 
+
+         ],
+ 
+         "display"=>[
+            "usename" ,"application_name","client_addr","state", "sync_priority " ,"sync_state",
+         ]
+     
+ ]);
+
+
+
+    
+}
 ?>
