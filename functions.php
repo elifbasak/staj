@@ -838,7 +838,7 @@ function isReplica(){
 
 
 
-function getPostgresqConf(){
+function getPostgresqConfMaster(){
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
     $output=runCommand("cat /var/lib/pgsql/12/data/postgresql.conf");
@@ -864,15 +864,40 @@ function getPostgresqConf(){
    $output3=runCommand('echo "host     replication    rep_user          10.154.25.188/32      trust" >> /var/lib/pgsql/12/data/pg_hba.conf');
    $output4=runCommand('echo "host     replication    rep_user          10.154.25.188/32      trust" >> /var/lib/pgsql/12/data/pg_hba.conf');
    $output5=runCommand('echo  '.$array.' >> /var/lib/pgsql/12/data/pg_hba.conf');
-   $output2 =runCommand('PGPASSWORD='.$password.' psql   -c "createuser --replication -P rep_user  with password Passw0rd" -h localhost -U postgres -A ' );
-  
-  
+   $output6 =runCommand('PGPASSWORD='.$password.' psql   -c "CREATE ROLE rep_user  WITH PASSWORD \'Passw0rd\'  REPLICATION ;" -h localhost -U postgres -A ' );
+   $output7=runCommand(sudo().'systemctl restart postgresql-12');
+
+   $connection = ssh2_connect($parameters['10.154.25.188'], $parameters['22']);
+
+    ssh2_auth_password($connection, $parameters['centos'], $parameters['Passw0rd']) ;
+    $output8= ssh2_exec($connection,localSudo().'systemctl stop postgresql-12' );
+
+ //$output9= ssh2_exec($connection,localSudo().'pg_basebackup -R -h www.srv.world -U rep_user -D /var/opt/rh/rh-postgresql12/lib/pgsql/data -P ' ));
+ $output10 = ssh2_exec($connection,localSudo().'sed -i "s%#listen_addresses = \'localhost\'%listen_addresses = \'*\'%"  /var/lib/pgsql/12/data/pg_hba.conf' );
+ $output11= ssh2_exec($connection,localSudo().'sed -i "s%#hot_standby = on%hot_standby = on%"  /var/lib/pgsql/12/data/pg_hba.conf' );
+ $output12=ssh2_exec($connection,localSudo().'sed -i "s%host    replication     all             127.0.0.1/32            ident%#host    replication     all             127.0.0.1/32            ident%"  /var/lib/pgsql/12/data/pg_hba.conf');
+   $output13=ssh2_exec($connection,localSudo().'sed -i "s%host    replication     all             ::1/128                 ident%#host    replication     all             ::1/128                 ident%"  /var/lib/pgsql/12/data/pg_hba.conf');
+   $output14=ssh2_exec($connection,localSudo().'echo "host     replication    rep_user          10.154.25.188/32      trust" >> /var/lib/pgsql/12/data/pg_hba.conf');
+   $output15=ssh2_exec($connection,localSudo().'echo "host     replication    rep_user          10.154.25.188/32      trust" >> /var/lib/pgsql/12/data/pg_hba.conf');
+   $output16=ssh2_exec($connection,localSudo().'echo "user=rep_user password=Passw0rd host=10.154.25.151 port=5432 sslmode=prefer sslcompression=0 gssencmode=prefer krbsrvname=postgres target_session_attrs=any application_name=node01" >> /var/lib/pgsql/12/data/postgresql.auto.conf');
    // dd($postgresConfArray);
    //$postgresConfArray = 
-
+   $output7=ssh2_exec($connection,localSudo().'systemctl restart postgresql-12');
 
     return respond($output);
 }
+
+
+function localSudo($password='1')
+
+{
+
+    $pass64 = base64_encode($password."\n");
+
+    return 'echo ' . $pass64 .' | base64 -d | sudo -S -p " " id 2>/dev/null 1>/dev/null; sudo ';
+
+}
+
 
 
 
@@ -920,5 +945,27 @@ function arr2ini(array $a, array $parent = array())
 
 
 
+function getSambaConf($ssh=null)
+{
+    if($ssh == null){
+        list($flag,$ssh) = createSSHConnection();
+
+        if(!$flag){
+            abort($ssh,201);
+        }
+    }
+
+    $output = $ssh->exec(sudo()."cat /etc/samba/smb.conf");
+    $lines = explode("\n", $output);
+    $exclude = array();
+    foreach ($lines as $line) {
+        if (strpos($line, '#') !== false) {
+            continue;
+        }
+        $exclude[] = $line;
+    }
+    $output = implode("\n", $exclude);
+    return collect(parse_ini_string($output, true, INI_SCANNER_RAW));
+}
 
 ?>
