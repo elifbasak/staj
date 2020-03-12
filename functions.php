@@ -833,8 +833,92 @@ function isReplica(){
      
  ]);
 
-
-
-    
 }
+
+
+
+
+function getPostgresqConf(){
+    $username = extensionDb("postgreUsername");
+    $password = extensionDb("postgrePassword");
+    $output=runCommand("cat /var/lib/pgsql/12/data/postgresql.conf");
+    $lines = explode("\n", $output);
+    $exclude = array();
+    foreach ($lines as $line) {
+        if (strpos($line, '#') !== false) {
+            continue;
+        }
+        $exclude[] = $line;
+    }
+    $output = implode("\n", $exclude);
+   $postgresConfArray= parse_ini_string($output, true, INI_SCANNER_RAW);
+   $postgresConfArray["listen_addresses"]='*';
+   $postgresConfArray["wal_level"]='replica';
+   $postgresConfArray["synchronous_commit"]='on';
+   $postgresConfArray["max_wal_senders"]=10;
+   $postgresConfArray["wal_keep_segments"]=10;
+   $postgresConfArray["synchronous_standby_names"]='*';
+   $array = arr2ini($postgresConfArray);
+   $output1=runCommand('sed -i "s%host    replication     all             127.0.0.1/32            ident%#host    replication     all             127.0.0.1/32            ident%"  /var/lib/pgsql/12/data/pg_hba.conf');
+   $output2=runCommand('sed -i "s%host    replication     all             ::1/128                 ident%#host    replication     all             ::1/128                 ident%"  /var/lib/pgsql/12/data/pg_hba.conf');
+   $output3=runCommand('echo "host     replication    rep_user          10.154.25.188/32      trust" >> /var/lib/pgsql/12/data/pg_hba.conf');
+   $output4=runCommand('echo "host     replication    rep_user          10.154.25.188/32      trust" >> /var/lib/pgsql/12/data/pg_hba.conf');
+   $output5=runCommand('echo  '.$array.' >> /var/lib/pgsql/12/data/pg_hba.conf');
+   $output2 =runCommand('PGPASSWORD='.$password.' psql   -c "createuser --replication -P rep_user  with password Passw0rd" -h localhost -U postgres -A ' );
+  
+  
+   // dd($postgresConfArray);
+   //$postgresConfArray = 
+
+
+    return respond($output);
+}
+
+
+
+
+function getPostgresqConf2(){
+   // $output=runCommand('sed -i "s%#host    replication     all             127.0.0.1/32            ident%#yeni    replication     all             127.0.0.1/32            ident%"  /var/lib/pgsql/12/data/pg_hba.conf');
+    $output=runCommand('echo "host e    replication    rep_user          10.154.25.188/32      trust" >> /var/lib/pgsql/12/data/pg_hba.conf');
+ 
+  
+   
+   
+   dd($output);
+   //$postgresConfArray = 
+
+
+    return respond($output);
+}
+
+
+
+
+
+
+function arr2ini(array $a, array $parent = array())
+{
+  $out = '';
+  foreach ($a as $k => $v)
+  {
+    if (is_array($v))
+    {
+      $sec = array_merge((array) $parent, (array) $k);
+      $out .= '[' . join('.', $sec) . ']' . PHP_EOL;
+      $out .= arr2ini($v, $sec);
+    }
+    else
+    {
+      $out .= "$k=$v" . PHP_EOL;
+    }
+  }
+  return $out;
+}
+
+
+
+
+
+
+
 ?>
