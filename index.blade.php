@@ -1052,7 +1052,7 @@ formData.append("par",idSelect);
     }
 
 
-    function isReplicaJS(){
+   /* function isReplicaJS(){
         var formData = new FormData();
        request("{{API('isReplica')}}", formData , function(response) {
        // $('#modaltest10').modal("show"); 
@@ -1088,6 +1088,43 @@ formData.append("par",idSelect);
   
   });
     }
+*/
+    function isReplicaJS(){
+
+        var formData = new FormData();
+        request("{{API('getPostgresqConf2')}}", formData , function(response) {
+            if(response.indexOf('Bulunmuyor')==-1){
+            Swal.fire({
+        position: 'center',
+        type :'success',
+        title :"Replikasyon bulunuyor",
+        timer: 2000,
+    });
+   
+   // $('#modalReplica').modal("show"); 
+    //$('#modalReplica').find('.modal-body').html(response);
+
+    
+  }}, function(error) {
+      let json = JSON.parse(error);
+      Swal.fire({
+          position: 'center',
+          type: 'error',
+          title: json["message"],
+          timer: 2000,
+          showConfirmButton: false,
+      });
+  
+  });
+
+
+
+
+
+
+    }
+
+
     
     </script>
     </body>
