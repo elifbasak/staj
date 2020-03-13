@@ -196,8 +196,8 @@ function databaseTable(){
     $password = extensionDb("postgrePassword");
 
    // $output =runCommand('PGPASSWORD='.$password.' psql -c "SELECT datname from pg_database" -h localhost -U '.$username.' -A | head -n -1');
-   $output = runCommand('PGPASSWORD='.$password.' psql -d postgres -c "\\l" -h localhost -U postgres -A | awk -F"|" \'{ if (NR>2 && $2) print $1 "-" $2 }\'');
-   $output2 = runCommand('PGPASSWORD='.$password.' psql -c "SELECT datname,datacl from pg_database " -h localhost -U postgres -A | awk -F"|" \'{ if (NR>1) print $1 "|" $2 }\' | head -n -1');
+   $output = runCommand('PGPASSWORD='.$password.' psql -d postgres -c "\\l" -h localhost -U '.$username.' -A | awk -F"|" \'{ if (NR>2 && $2) print $1 "-" $2 }\'');
+   $output2 = runCommand('PGPASSWORD='.$password.' psql -c "SELECT datname,datacl from pg_database " -h localhost -U '.$username.' -A | awk -F"|" \'{ if (NR>1) print $1 "|" $2 }\' | head -n -1');
         // dd($output2);
   $output3=runCommand('PGPASSWORD='.$password.' psql -c " SELECT pg_database.datname as "database_name", pg_size_pretty(pg_database_size(pg_database.datname)) AS size_in_mb FROM pg_database ORDER by size_in_mb DESC" -h localhost -U postgres -A | tail -n +2');
      $array =[];
@@ -839,6 +839,13 @@ function isReplica(){
 
 
 function getPostgresqConfMaster(){
+
+
+    $slaveId = request("slaveId");
+    $slaveUserName = request("slaveUserName");
+    $slaveUserPassword = request("slaveUserPassword");
+
+
     $username = extensionDb("postgreUsername");
     $password = extensionDb("postgrePassword");
     $output=runCommand("cat /var/lib/pgsql/12/data/postgresql.conf");
@@ -859,6 +866,8 @@ function getPostgresqConfMaster(){
    $postgresConfArray["wal_keep_segments"]=10;
    $postgresConfArray["synchronous_standby_names"]='*';
    $array = arr2ini($postgresConfArray);
+   runCommand(sudo().'firewall-cmd --add-service=postgresql --permanent');
+   runCommand(sudo().'firewall-cmd --reload ');
    $output1=runCommand('sed -i "s%host    replication     all             127.0.0.1/32            ident%#host    replication     all             127.0.0.1/32            ident%"  /var/lib/pgsql/12/data/pg_hba.conf');
    $output2=runCommand('sed -i "s%host    replication     all             ::1/128                 ident%#host    replication     all             ::1/128                 ident%"  /var/lib/pgsql/12/data/pg_hba.conf');
    $output3=runCommand('echo "host     replication    rep_user          10.154.25.188/32      trust" >> /var/lib/pgsql/12/data/pg_hba.conf');
@@ -872,7 +881,7 @@ function getPostgresqConfMaster(){
     ssh2_auth_password($connection, $parameters['centos'], $parameters['Passw0rd']) ;
     $output8= ssh2_exec($connection,localSudo().'systemctl stop postgresql-12' );
 
- //$output9= ssh2_exec($connection,localSudo().'pg_basebackup -R -h www.srv.world -U rep_user -D /var/opt/rh/rh-postgresql12/lib/pgsql/data -P ' ));
+ $output9= ssh2_exec($connection,localSudo().'su - postgres ; pg_basebackup -R -h 10.154.25.151 -U rep_user -D /var/lib/pgsql/12/data ; Passw0rd ; exit');
  $output10 = ssh2_exec($connection,localSudo().'sed -i "s%#listen_addresses = \'localhost\'%listen_addresses = \'*\'%"  /var/lib/pgsql/12/data/pg_hba.conf' );
  $output11= ssh2_exec($connection,localSudo().'sed -i "s%#hot_standby = on%hot_standby = on%"  /var/lib/pgsql/12/data/pg_hba.conf' );
  $output12=ssh2_exec($connection,localSudo().'sed -i "s%host    replication     all             127.0.0.1/32            ident%#host    replication     all             127.0.0.1/32            ident%"  /var/lib/pgsql/12/data/pg_hba.conf');
@@ -915,6 +924,22 @@ function getPostgresqConf2(){
 
     return respond($output);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
