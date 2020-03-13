@@ -217,6 +217,35 @@
 
     <div id="sekmeReplikasyon" class="tab-pane active">
         <div id="tableReplica">
+            <button type="button" class="btn btn-primary" id="myBtnReplica" data-target="#ModalReplica"> Replikasyon Ekle</button>
+            <div class="modal fade" id="ModalReplica">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                           
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                        <h5>Lütfen Eklemek İstediğiniz Kullanıcı İsmini Giriniz </h5>
+                        <form>
+                            <p >Slave Id giriniz :</p>
+                        <input type="text" id="slaveId">
+                        <p >Slave Kullanıcı Parola giriniz </p>
+                        <input type="text" id="slaveUserName">
+                        <p >Slave Kullanıcı Adı giriniz :</p>
+                        <input type="text" id="slaveUserPassword">
+                        </form>
+                                    </div>
+                        
+                        <div class="modal-footer">
+                           
+                            <button type="button" class="btn btn-primary" id="myBtnReplica">Slave Ekle</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                        </div>
+                    </div>
+                </div>
+             </div>
+            </div>
     </div>
 </div>
         
@@ -304,6 +333,21 @@
             "class" => "btn-primary",
     
             "onclick" => "addTableForm()"
+    
+        ]
+       
+    ])
+    @endcomponent
+    @component('modal-component',[
+        "id"=>"ModalReplica",
+        "title" => "Replika",
+        "footer" => [
+    
+            "text" => "Ekle",
+    
+            "class" => "btn-primary",
+    
+            "onclick" => ""
     
         ]
        
@@ -942,7 +986,35 @@ formData.append("par",idSelect);
     });
 
     
+    $("#myBtnReplica").click(function() {
+        //console.log(tableName);
+        $('#ModalReplica').modal("show");
+    var str = $("#slaveId").val();
+    var str2 = $("#slaveUserName").val();
+    var str3 = $("#slaveUserPassword").val();
+    var formData = new FormData();
+    formData.append("slaveId", str);
+    formData.append("slaveUserName", str2);
+    formData.append("slaveUserPassword", str3);
+    //formData.append("tableName",tableName);
     
+    request("{{API('getPostgresqConfMaster')}}", formData, function(response) {
+        //$('#ModalReplica').modal("hide");
+       
+    }, function(error) {
+        let json = JSON.parse(error);
+        Swal.fire({
+            position: 'center',
+            type: 'error',
+            title: json["message"],
+            timer: 2000,
+            showConfirmButton: false,
+        });
+    
+    });
+    
+    });
+
     
     
     function addTableForm(){
@@ -1003,6 +1075,14 @@ formData.append("par",idSelect);
 
      
     
+    }
+
+
+
+    function GetReplica(){
+
+
+        
     }
     function tableInfoTake(){
         var formData = new FormData();
